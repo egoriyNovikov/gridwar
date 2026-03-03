@@ -1,0 +1,45 @@
+  version: '3.8'
+
+  services:
+    postgres:
+      image: postgres:15-alpine
+      container_name: gridwar_postgres
+      restart: unless-stopped
+      environment:
+        POSTGRES_DB: gridwar_db
+        POSTGRES_USER: gridwar_user
+        POSTGRES_PASSWORD: gridwar_password
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      networks:
+        - gridwar_network
+
+    app:
+      build: .
+      container_name: gridwar_app
+      restart: unless-stopped
+      ports:
+        - "8080:8080"
+      environment:
+        - DB_HOST=postgres
+        - DB_PORT=5432
+        - DB_USER=gridwar_user
+        - DB_PASSWORD=gridwar_password
+        - DB_NAME=gridwar_db
+        - HOST=0.0.0.0
+        - PORT=8080
+      volumes:
+        - .:/app
+        - /app/tmp
+        - /app/vendor
+      depends_on:
+        - postgres
+      networks:
+        - gridwar_network
+  volumes:
+    postgres_data:
+  networks:
+    gridwar_network:
+      driver: bridge
