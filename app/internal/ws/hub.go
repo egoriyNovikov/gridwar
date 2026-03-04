@@ -26,6 +26,15 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.send)
 			}
+		case message := <-h.broadcast:
+			for client := range h.clients {
+				select {
+				case client.send <- message:
+				default:
+					close(client.send)
+					delete(h.clients, client)
+				}
+			}
 		}
 	}
 }

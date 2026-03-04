@@ -22,4 +22,6 @@ func HandleWS(w http.ResponseWriter, r *http.Request, hub *ws.Hub) {
 	}
 	client := ws.NewClient(hub, conn)
 	hub.Register(client)
+	go client.ReadPump()
+	go client.WritePump()
 }

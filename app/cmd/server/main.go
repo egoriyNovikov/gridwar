@@ -19,6 +19,10 @@ func main() {
 	hub := ws.NewHub()
 	go hub.Run()
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/index.html")
+	})
+
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		httpHandler.HandleWS(w, r, hub)
 	})
