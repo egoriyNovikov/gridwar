@@ -15,8 +15,9 @@ type DBConfig struct {
 }
 
 type ServerConfig struct {
-	Host string
-	Port string
+	Host      string
+	Port      string
+	StaticDir string
 }
 
 type Config struct {
@@ -29,6 +30,13 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	getEnv := func(key, def string) string {
+		if v := os.Getenv(key); v != "" {
+			return v
+		}
+		return def
+	}
+
 	cfg := &Config{
 		DB: DBConfig{
 			Host:     os.Getenv("DB_HOST"),
@@ -38,8 +46,9 @@ func LoadConfig() (*Config, error) {
 			DBName:   os.Getenv("DB_NAME"),
 		},
 		Server: ServerConfig{
-			Host: os.Getenv("HOST"),
-			Port: os.Getenv("PORT"),
+			Host:      os.Getenv("HOST"),
+			Port:      os.Getenv("PORT"),
+			StaticDir: getEnv("STATIC_DIR", "web"),
 		},
 	}
 
