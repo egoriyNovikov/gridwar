@@ -1,0 +1,43 @@
+package ws
+
+type Hub struct {
+	clients    map[*Client]bool
+	register   chan *Client
+	unregister chan *Client
+	broadcast  chan []byte
+}
+
+func NewHub() *Hub {
+	return &Hub{
+		clients:    make(map[*Client]bool),
+		register:   make(chan *Client, 256),
+		unregister: make(chan *Client, 256),
+		broadcast:  make(chan []byte, 256),
+	}
+}
+
+func (h *Hub) Run() {
+	for {
+		select {
+		case client := <-h.register:
+			h.clients[client] = true
+		case client := <-h.unregister:
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+			}
+		}
+	}
+}
+
+func (h *Hub) Register(client *Client) {
+	h.register <- client
+}
+
+func (h *Hub) Unregister(client *Client) {
+	h.unregister <- client
+}
+
+func (h *Hub) Broadcast(message []byte) {
+	h.broadcast <- message
+}
